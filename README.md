@@ -1,3 +1,12 @@
+---
+title: Eng French Translator
+emoji: 🌍
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # Linguo: Intelligent EN ↔ FR Translation Hub
 
 Linguo is a modern, feature-rich translation application featuring a beautiful, interactive frontend powered by an advanced FastAPI machine learning backend. Under the hood, Linguo uses local, pre-trained Hugging Face transformer models (`Helsinki-NLP/opus-mt`) for high-fidelity, bidirectional English-French translation, file parsing, and semantic rephrasing.
