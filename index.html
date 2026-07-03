@@ -389,7 +389,6 @@
       min-width: 210px;
       text-align: center;
       position: relative;
-      /* Palette-toned boundary — 2px primary purple border + accent left strip */
       border: 2px solid rgba(139, 124, 246, 0.32);
       border-left: 4px solid rgba(139, 124, 246, 0.55);
       box-shadow:
@@ -397,7 +396,6 @@
         0 1px 4px rgba(139, 124, 246, 0.10);
     }
 
-    /* Top-edge shimmer line */
     .lang-card::before {
       content: '';
       position: absolute;
@@ -1944,7 +1942,7 @@
 
   <!-- ─── JavaScript ─────────────────────────────────────────── -->
   <script>
-    const API_URL = 'http://localhost:8000/translate';
+    const API_URL = '/translate';
 
     // ── Theme Toggle ─────────────────────────────────────────
     const themeToggle = document.getElementById('themeToggle');
@@ -2054,7 +2052,7 @@
         translateBtn.disabled = false;
         translateBtn.innerHTML = 'Translate &#8594;';
         outputBox.style.opacity = '1';
-        outputBox.innerHTML = '<div style="color:#ef4444;font-size:0.92rem;">&#9888;&#65039; ' + escHtml(err.message) + '<br/><small style="color:var(--text-muted)">Make sure the backend is running: uvicorn app:app --port 8000</small></div>';
+        outputBox.innerHTML = '<div style="color:#ef4444;font-size:0.92rem;">&#9888;&#65039; ' + escHtml(err.message) + '<br/><small style="color:var(--text-muted)">Make sure the backend is running.</small></div>';
         outputActions.style.display = 'flex';
       }
     }
@@ -2219,7 +2217,7 @@
       try {
         const fd = new FormData();
         fd.append('file', file);
-        const res = await fetch('http://localhost:8000/translate-file', { method: 'POST', body: fd });
+        const res = await fetch('/translate-file', { method: 'POST', body: fd });
         if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Failed'); }
         const data = await res.json();
         currentFileText = data.translated_text;
@@ -2255,7 +2253,7 @@
       const downloadName = `${baseName}_translated.${ext}`;
 
       try {
-        const res = await fetch(`http://localhost:8000/${endpoint}`, {
+        const res = await fetch(`/${endpoint}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: currentFileText, filename: downloadName })
@@ -2300,7 +2298,7 @@
       toast.classList.remove('show');
 
       try {
-        const res = await fetch('http://localhost:8000/rephrase', {
+        const res = await fetch('/rephrase', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, source_lang: rephraseLang })
@@ -2319,5 +2317,3 @@
     });
   </script>
 </body>
-
-</html>
