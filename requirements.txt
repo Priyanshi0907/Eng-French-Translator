@@ -5,3 +5,8 @@ torch
 sentencepiece
 langdetect
 pydantic
+python-multipart
+python-docx
+python-pptx
+pdfplumber
+reportlab

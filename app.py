@@ -68,6 +68,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.responses import FileResponse
+
+@app.get("/")
+def serve_index():
+    return FileResponse("index.html")
+
 
 # ── Schemas ────────────────────────────────────────────────────────────
 class TranslateRequest(BaseModel):
