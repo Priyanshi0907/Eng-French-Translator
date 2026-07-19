@@ -1,0 +1,2454 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linguo — Multilingual Translator (100+ Languages)</title>
+  <meta name="description"
+    content="Fast, accurate, ML-powered translation across 100+ languages. Built with Meta AI's NLLB-200 model." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* ─── Design Tokens ─────────────────────────────────────── */
+    :root {
+      --bg: #FAF8FF;
+      --bg2: #F3F0FF;
+      --card: #FFFFFF;
+      --primary: #8B7CF6;
+      --primary-h: #7868F2;
+      --accent: #CDBDFF;
+      --accent2: #E8E2FF;
+      --text: #453F57;
+      --text-muted: #7B7491;
+      --border: rgba(139, 124, 246, 0.18);
+      --shadow: 0 8px 40px rgba(139, 124, 246, 0.12);
+      --shadow-lg: 0 20px 60px rgba(139, 124, 246, 0.18);
+      --radius: 22px;
+      --transition: 0.28s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #1A1828;
+      --bg2: #221F35;
+      --card: #2A263E;
+      --primary: #9D8FF8;
+      --primary-h: #B4A9FF;
+      --accent: #6B5FCC;
+      --accent2: #322E4E;
+      --text: #EDE9FF;
+      --text-muted: #9B93C0;
+      --border: rgba(157, 143, 248, 0.22);
+      --shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* ─── Blob Background ───────────────────────────────────── */
+    .blob-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.38;
+      animation: blobFloat 12s ease-in-out infinite alternate;
+    }
+
+    .blob-1 {
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, #CDBDFF, #8B7CF6);
+      top: -120px;
+      left: -120px;
+      animation-delay: 0s;
+    }
+
+    .blob-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #FFF5E8, #F0E6FF);
+      bottom: -100px;
+      right: -80px;
+      animation-delay: -5s;
+    }
+
+    .blob-3 {
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, #C4B5FD, transparent);
+      top: 40%;
+      left: 55%;
+      animation-delay: -9s;
+      opacity: 0.22;
+    }
+
+    @keyframes blobFloat {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+
+      to {
+        transform: translate(28px, 20px) scale(1.06);
+      }
+    }
+
+    [data-theme="dark"] .blob-1 {
+      opacity: 0.2;
+    }
+
+    [data-theme="dark"] .blob-2 {
+      opacity: 0.12;
+    }
+
+    [data-theme="dark"] .blob-3 {
+      opacity: 0.1;
+    }
+
+    /* ─── Navbar ────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 60px;
+      background: rgba(250, 248, 255, 0.72);
+      backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+
+    [data-theme="dark"] nav {
+      background: rgba(26, 24, 40, 0.78);
+    }
+
+    .nav-logo {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-logo span {
+      color: var(--text);
+    }
+
+    .logo-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 38px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.93rem;
+      font-weight: 500;
+      transition: color var(--transition);
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transition: transform var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-links a:hover::after {
+      transform: scaleX(1);
+    }
+
+    .theme-toggle {
+      width: 44px;
+      height: 26px;
+      background: var(--accent2);
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      position: relative;
+      transition: background var(--transition);
+      outline: none;
+    }
+
+    .theme-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      transition: transform var(--transition);
+      box-shadow: 0 2px 6px rgba(139, 124, 246, 0.4);
+    }
+
+    [data-theme="dark"] .theme-toggle::after {
+      transform: translateX(18px);
+    }
+
+    /* ─── Section wrapper ───────────────────────────────────── */
+    section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    /* ─── Fade-up animation ─────────────────────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── Hero ──────────────────────────────────────────────── */
+    #home {
+      min-height: 100vh;
+      padding-top: 100px;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      padding: 60px 0 80px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent2);
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .hero-eyebrow span {
+      font-size: 1rem;
+    }
+
+    .hero-h1 {
+      font-size: clamp(2.6rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      letter-spacing: -1px;
+    }
+
+    .hero-h1 .grad {
+      background: linear-gradient(135deg, var(--primary), #C084FC);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 36px;
+      max-width: 440px;
+      line-height: 1.7;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary), #7C3AED);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px 34px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 6px 28px rgba(139, 124, 246, 0.38);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 10px 38px rgba(139, 124, 246, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    /* Floating language cards */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 420px;
+    }
+
+    .float-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .lang-card {
+      background: #FFFFFF;
+      border-radius: var(--radius);
+      padding: 22px 36px;
+      min-width: 210px;
+      text-align: center;
+      position: relative;
+      border: 2px solid rgba(139, 124, 246, 0.32);
+      border-left: 4px solid rgba(139, 124, 246, 0.55);
+      box-shadow:
+        0 6px 28px rgba(139, 124, 246, 0.16),
+        0 1px 4px rgba(139, 124, 246, 0.10);
+    }
+
+    .lang-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 12px;
+      right: 12px;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, transparent, rgba(139, 124, 246, 0.45), transparent);
+      pointer-events: none;
+    }
+
+    [data-theme="dark"] .lang-card {
+      background: rgba(42, 38, 62, 0.92);
+      border: 2px solid rgba(157, 143, 248, 0.38);
+      border-left: 4px solid rgba(157, 143, 248, 0.65);
+      box-shadow: 0 6px 28px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(139, 124, 246, 0.18);
+    }
+
+    .lang-card-label {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .lang-card-words {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .lang-word {
+      font-size: 0.88rem;
+      color: var(--text);
+      padding: 6px 14px;
+      background: rgba(139, 124, 246, 0.08);
+      border: 1px solid rgba(139, 124, 246, 0.20);
+      border-radius: 9px;
+      font-weight: 500;
+      transition: background var(--transition);
+    }
+
+    .lang-word:hover {
+      background: rgba(139, 124, 246, 0.18);
+    }
+
+    .float-arrow {
+      font-size: 1.5rem;
+      color: var(--primary);
+      animation: arrowPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes arrowPulse {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(5px)
+      }
+    }
+
+    .card-en {
+      animation: floatUp 6s ease-in-out infinite;
+    }
+
+    .card-fr {
+      animation: floatUp 6s ease-in-out infinite reverse;
+    }
+
+    .lang-count-badge {
+      margin-top: 20px;
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--primary);
+      background: var(--accent2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 18px;
+      display: inline-block;
+    }
+
+    @keyframes floatUp {
+
+      0%,
+      100% {
+        transform: translateY(0px)
+      }
+
+      50% {
+        transform: translateY(-14px)
+      }
+    }
+
+    /* ─── Translator Card ───────────────────────────────────── */
+    #translator {
+      padding: 80px 0 60px;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .section-label::before {
+      content: '';
+      width: 28px;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .translator-heading {
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 0;
+    }
+
+    .translator-heading-grad {
+      background: linear-gradient(135deg, var(--primary), #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding: 0 4px 4px;
+    }
+
+    .translator-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow-lg);
+      padding: 44px 48px;
+      margin-top: 32px;
+    }
+
+    .translator-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .lang-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+
+    .lang-badge .flag {
+      font-size: 1.4rem;
+    }
+
+    .lang-select {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 0.98rem;
+      color: var(--text);
+      background: var(--accent2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 14px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color var(--transition), background var(--transition);
+      max-width: 200px;
+    }
+
+    .lang-select:hover,
+    .lang-select:focus {
+      border-color: var(--primary);
+    }
+
+    .file-lang-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .file-lang-row .lang-select {
+      max-width: 220px;
+    }
+
+    .swap-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--accent2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      color: var(--primary);
+      transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+
+    .swap-btn:hover {
+      background: var(--accent);
+      box-shadow: 0 4px 18px rgba(139, 124, 246, 0.25);
+    }
+
+    .swap-btn.rotating {
+      transform: rotate(180deg);
+    }
+
+    .translator-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .textarea-wrap {
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 190px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      resize: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      line-height: 1.65;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(139, 124, 246, 0.13);
+    }
+
+    .char-count {
+      position: absolute;
+      bottom: 12px;
+      right: 16px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .output-wrap {
+      position: relative;
+    }
+
+    .output-box {
+      width: 100%;
+      min-height: 190px;
+      background: linear-gradient(145deg, var(--bg2), var(--accent2));
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.65;
+      transition: opacity 0.4s ease;
+    }
+
+    .output-placeholder {
+      color: var(--text-muted);
+      font-style: italic;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 150px;
+      text-align: center;
+    }
+
+    .output-placeholder-icon {
+      font-size: 2rem;
+      opacity: 0.5;
+    }
+
+    .output-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      outline: none;
+    }
+
+    .action-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .action-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+    }
+
+    /* Translate button row */
+    .translate-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 28px;
+      gap: 16px;
+    }
+
+    .btn-translate {
+      background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px 48px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      box-shadow: 0 6px 28px rgba(139, 124, 246, 0.38);
+      transition: transform var(--transition), box-shadow var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 200px;
+      justify-content: center;
+    }
+
+    .btn-translate:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 10px 38px rgba(139, 124, 246, 0.5);
+    }
+
+    .btn-translate:active {
+      transform: scale(0.98);
+    }
+
+    .btn-translate:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .success-toast {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #22c55e;
+      font-size: 0.9rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .success-toast.show {
+      opacity: 1;
+    }
+
+    /* Loading dots */
+    .loading-dots span {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fff;
+      margin: 0 2px;
+      animation: dotBounce 1.2s ease-in-out infinite;
+    }
+
+    .loading-dots span:nth-child(2) {
+      animation-delay: 0.2s
+    }
+
+    .loading-dots span:nth-child(3) {
+      animation-delay: 0.4s
+    }
+
+    @keyframes dotBounce {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0)
+      }
+
+      30% {
+        transform: translateY(-6px)
+      }
+    }
+
+    /* ─── Tabs ───────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      background: var(--bg2);
+      border-radius: 14px;
+      padding: 5px;
+      margin-bottom: 32px;
+      width: fit-content;
+      border: 1.5px solid var(--border);
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all var(--transition);
+    }
+
+    .tab-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      flex-shrink: 0;
+    }
+
+    .tab-btn.active {
+      background: var(--card);
+      color: var(--primary);
+      box-shadow: 0 2px 12px rgba(139, 124, 246, 0.15);
+      font-weight: 600;
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--text);
+      background: var(--accent2);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* File upload */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 18px;
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: var(--bg2);
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary);
+      background: var(--accent2);
+    }
+
+    .drop-zone input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon {
+      font-size: 2.4rem;
+      margin-bottom: 14px;
+    }
+
+    .drop-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .drop-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .drop-pills {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .drop-pill {
+      background: var(--accent2);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .file-result {
+      margin-top: 24px;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      display: none;
+    }
+
+    .file-result-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .file-result-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .file-result-badge {
+      background: var(--accent2);
+      color: var(--primary);
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .file-result-text {
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.7;
+      max-height: 280px;
+      overflow-y: auto;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      white-space: pre-wrap;
+    }
+
+    /* Rephrase */
+    .rephrase-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .rephrase-box {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      min-height: 200px;
+    }
+
+    .rephrase-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .rephrase-output {
+      background: linear-gradient(145deg, var(--bg2), var(--accent2));
+      border-color: var(--accent);
+    }
+
+    .rephrase-output-text {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .rephrase-placeholder {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+
+    /* ─── Translation Journal ────────────────────────────────── */
+    .journal-section {
+      margin-top: 48px;
+    }
+
+    .journal-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .journal-empty {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 30px;
+      font-size: 0.92rem;
+      font-style: italic;
+    }
+
+    .journal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .journal-item {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 22px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      animation: slideIn 0.35s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .journal-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .journal-src {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--text);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
+    }
+
+    .journal-tgt {
+      font-size: 0.9rem;
+      color: var(--primary);
+      font-style: italic;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .journal-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .journal-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .j-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: all var(--transition);
+    }
+
+    .j-btn:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: var(--accent2);
+    }
+
+    .j-btn.fav.active {
+      color: #f59e0b;
+      border-color: #f59e0b;
+    }
+
+    .j-btn.del:hover {
+      color: #ef4444;
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    /* ─── Features ──────────────────────────────────────────── */
+    #features {
+      padding: 100px 0;
+    }
+
+    .section-heading {
+      font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .section-sub {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 56px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 30px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: transform var(--transition), box-shadow var(--transition);
+      cursor: default;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon {
+      font-size: 2.2rem;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: var(--accent2);
+      margin: 0 auto 20px;
+      transition: transform var(--transition);
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: rotate(-8deg) scale(1.1);
+    }
+
+    .feature-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .feature-pills {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: var(--accent2);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+    }
+
+    /* ─── How It Works ──────────────────────────────────────── */
+    #howitworks {
+      padding: 100px 0;
+      background: var(--bg2);
+    }
+
+    .timeline {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 31px;
+      top: 60px;
+      bottom: 60px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--accent));
+      border-radius: 2px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+      padding: 24px 0;
+      position: relative;
+    }
+
+    .timeline-num {
+      flex-shrink: 0;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #7C3AED);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(139, 124, 246, 0.38);
+      z-index: 1;
+    }
+
+    .timeline-content {
+      padding-top: 12px;
+    }
+
+    .timeline-content h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .timeline-content p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    .timeline-arrow {
+      text-align: center;
+      font-size: 1.5rem;
+      color: var(--accent);
+      padding: 4px 0;
+    }
+
+    /* ─── About Model ───────────────────────────────────────── */
+    #about {
+      padding: 100px 0;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .about-content h2 {
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+
+    .about-content p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 0.97rem;
+      line-height: 1.75;
+    }
+
+    .tech-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .tech-pill {
+      background: var(--accent2);
+      border: 1.5px solid var(--border);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 6px 18px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      transition: all var(--transition);
+    }
+
+    .tech-pill:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .model-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .model-card-header {
+      background: linear-gradient(135deg, var(--primary), #7C3AED);
+      padding: 22px 28px;
+      color: #fff;
+    }
+
+    .model-card-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .model-card-header p {
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+
+    .model-stats {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .stat-badge {
+      background: var(--accent2);
+      color: var(--primary);
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1.5px solid var(--border);
+      padding: 52px 0 32px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-logo {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .footer-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .footer-links a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 20px;
+      transition: all var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: var(--accent2);
+      transform: translateY(-2px);
+    }
+
+    .footer-bottom {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      padding-top: 22px;
+      margin-top: 12px;
+    }
+
+    .footer-bottom span {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* ─── Responsive ────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav {
+        padding: 16px 24px;
+      }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 40px;
+      }
+
+      .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .translator-body {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .translator-card {
+        padding: 28px 22px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Blobs -->
+  <div class="blob-container">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- ─── Navbar ─────────────────────────────────────────────── -->
+  <nav id="navbar">
+    <a href="#home" class="nav-logo">
+      <div class="logo-dot"></div>Linguo
+    </a>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="https://github.com/Priyanshi0907/Eng-French-Translator" target="_blank" rel="noopener">GitHub</a>
+      </li>
+    </ul>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme"></button>
+  </nav>
+
+  <!-- ─── Hero ──────────────────────────────────────────────── -->
+  <section id="home">
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-left fade-up">
+          <div class="hero-eyebrow"><span>&#127760;</span> ML-Powered Translation</div>
+          <h1 class="hero-h1">
+            Translate<br />
+            <span class="grad">100+ Languages</span><br />
+            Beautifully.
+          </h1>
+          <p class="hero-subtitle">
+            Experience fast and accurate machine-learning-powered translation.
+            Any language, any direction. Context-aware. Zero compromise on quality.
+          </p>
+          <a href="#translator" class="btn-primary">
+            Start Translating
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="hero-visual fade-up">
+          <div class="float-wrap">
+            <div class="lang-card card-en">
+              <div class="lang-card-label">&#127468;&#127463; English</div>
+              <div class="lang-card-words">
+                <span class="lang-word">Good morning</span>
+                <span class="lang-word">Thank you</span>
+                <span class="lang-word">Good evening</span>
+                <span class="lang-word">Goodbye</span>
+              </div>
+            </div>
+            <div class="float-arrow">&#8595;</div>
+            <div class="lang-card card-fr">
+              <div class="lang-card-label">&#127467;&#127479; French</div>
+              <div class="lang-card-words">
+                <span class="lang-word">Bonjour</span>
+                <span class="lang-word">Merci</span>
+                <span class="lang-word">Bonsoir</span>
+                <span class="lang-word">Au revoir</span>
+              </div>
+            </div>
+            <div class="lang-count-badge">&#127760; + 125 more languages supported</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Translator ─────────────────────────────────────────── -->
+  <section id="translator">
+    <div class="container">
+      <div class="fade-up">
+        <div class="section-label">Translator</div>
+        <h2 class="translator-heading">Translate Anything,<br /><span class="translator-heading-grad">Instantly.</span>
+        </h2>
+      </div>
+
+      <div class="translator-card fade-up">
+
+        <!-- Tab bar -->
+        <div class="tab-bar">
+          <button class="tab-btn active" id="tabText" onclick="switchTab('text')">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 6h16M4 12h16M4 18h12" />
+            </svg>
+            Translate text
+          </button>
+          <button class="tab-btn" id="tabFile" onclick="switchTab('file')">
+            <svg viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Translate files
+            <span style="font-size:0.72rem;color:var(--text-muted);">.pdf .docx .pptx</span>
+          </button>
+          <button class="tab-btn" id="tabRephrase" onclick="switchTab('rephrase')">
+            <svg viewBox="0 0 24 24">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+            </svg>
+            AI Rephrase
+          </button>
+        </div>
+
+        <!-- ── Tab 1: Translate Text ── -->
+        <div class="tab-panel active" id="panelText">
+          <div class="translator-header">
+            <select class="lang-select" id="srcLangSelect" aria-label="Source language"></select>
+            <button class="swap-btn" id="swapBtn" title="Swap languages" aria-label="Swap languages">&#8644;</button>
+            <select class="lang-select" id="tgtLangSelect" aria-label="Target language"></select>
+          </div>
+          <div class="translator-body">
+            <div class="textarea-wrap">
+              <textarea id="inputText" maxlength="500" placeholder="Start typing in English..."
+                aria-label="Source text input"></textarea>
+              <span class="char-count" id="charCount">0 / 500</span>
+            </div>
+            <div class="output-wrap">
+              <div class="output-box" id="outputBox">
+                <div class="output-placeholder">
+                  <span class="output-placeholder-icon">&#128172;</span>
+                  <span>Your French translation<br />will appear here.</span>
+                </div>
+              </div>
+              <div class="output-actions" id="outputActions" style="display:none">
+                <button class="action-btn" id="copyBtn" title="Copy translation">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                  </svg>
+                  Copy
+                </button>
+                <button class="action-btn" id="speakBtn" title="Listen to translation">
+                  <svg viewBox="0 0 24 24">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" />
+                  </svg>
+                  Speak
+                </button>
+                <button class="action-btn" id="clearBtn" title="Clear all">
+                  <svg viewBox="0 0 24 24">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path
+                      d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                  </svg>
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="translate-row">
+            <button class="btn-translate" id="translateBtn">Translate &#8594;</button>
+            <div class="success-toast" id="successToast">&#10003; Translation Complete</div>
+          </div>
+        </div>
+
+        <!-- ── Tab 2: Translate Files ── -->
+        <div class="tab-panel" id="panelFile">
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" accept=".pdf,.docx,.pptx" />
+            <div class="drop-icon">&#128196;</div>
+            <div class="drop-title">Drop your file here or click to browse</div>
+            <div class="drop-sub">Supports PDF, Word, and PowerPoint files</div>
+            <div class="drop-pills">
+              <span class="drop-pill">.pdf</span>
+              <span class="drop-pill">.docx</span>
+              <span class="drop-pill">.pptx</span>
+            </div>
+          </div>
+          <div class="file-lang-row">
+            <span>Translate to:</span>
+            <select class="lang-select" id="fileTgtLangSelect" aria-label="File target language"></select>
+            <span style="font-size:0.8rem;color:var(--text-muted)">(source language is auto-detected)</span>
+          </div>
+          <div class="translate-row" style="margin-top:20px">
+            <button class="btn-translate" id="fileTranslateBtn">Translate File &#8594;</button>
+            <div class="success-toast" id="fileSuccessToast">&#10003; File Translated</div>
+          </div>
+          <div class="file-result" id="fileResult">
+            <div class="file-result-header">
+              <span style="font-size:1.2rem">&#128196;</span>
+              <span class="file-result-name" id="fileResultName"></span>
+              <span class="file-result-badge" id="fileResultDir"></span>
+              <button class="action-btn" id="copyFileBtn" style="margin-left:auto">
+                <svg viewBox="0 0 24 24">
+                  <rect x="9" y="9" width="13" height="13" rx="2" />
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                </svg>
+                Copy
+              </button>
+            </div>
+            <div class="file-result-text" id="fileResultText"></div>
+
+            <!-- Download Options -->
+            <div class="file-download-actions"
+              style="margin-top:20px; display:flex; align-items:center; gap:12px; border-top:1.5px solid var(--border); padding-top:16px; flex-wrap:wrap;">
+              <span
+                style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">Download
+                translated file:</span>
+              <button class="action-btn" id="downloadDocxBtn" style="gap:8px;"
+                title="Download as Word Document (.docx)">
+                <svg viewBox="0 0 24 24" style="stroke:#2563eb;">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                Word (.docx)
+              </button>
+              <button class="action-btn" id="downloadPdfBtn" style="gap:8px;" title="Download as PDF (.pdf)">
+                <svg viewBox="0 0 24 24" style="stroke:#dc2626;">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                PDF (.pdf)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Tab 3: AI Rephrase ── -->
+        <div class="tab-panel" id="panelRephrase">
+          <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:18px">
+            <div>
+              <label style="font-size:0.85rem;color:var(--text-muted);font-weight:500">Language</label>
+              <div style="margin-top:8px">
+                <select class="lang-select" id="rephraseLangSelect" aria-label="Rephrase language"></select>
+              </div>
+            </div>
+            <div>
+              <label style="font-size:0.85rem;color:var(--text-muted);font-weight:500">Engine</label>
+              <div style="margin-top:8px">
+                <select class="lang-select" id="rephraseEngineSelect" aria-label="Rephrase engine">
+                  <option value="backtranslation" selected>Back-translation (any language)</option>
+                  <option value="paraphrase">Paraphrase model (English only)</option>
+                  <option value="llm">AI / LLM (any language, needs API key)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="rephrase-grid">
+            <div class="rephrase-box">
+              <div class="rephrase-label">Original text</div>
+              <textarea id="rephraseInput"
+                style="min-height:170px;background:transparent;border:none;outline:none;width:100%;resize:none;font-family:Inter,sans-serif;font-size:0.95rem;color:var(--text);line-height:1.65;padding:0"
+                placeholder="Type or paste text to rephrase..."></textarea>
+            </div>
+            <div class="rephrase-box rephrase-output">
+              <div class="rephrase-label">AI Rephrased</div>
+              <div class="rephrase-output-text" id="rephraseOutput">
+                <span class="rephrase-placeholder">Your rephrased text will appear here.</span>
+              </div>
+            </div>
+          </div>
+          <div class="translate-row" style="margin-top:20px">
+            <button class="btn-translate" id="rephraseBtn">Rephrase &#8594;</button>
+            <div class="success-toast" id="rephraseToast">&#10003; Rephrased!</div>
+          </div>
+          <div id="rephraseEngineNote"
+            style="margin-top:16px;padding:14px 18px;background:var(--accent2);border-radius:12px;border:1px solid var(--border);font-size:0.82rem;color:var(--text-muted);">
+            &#129302; <strong>How it works:</strong> Uses back-translation through a pivot language (e.g. your
+            language &#8594; English &#8594; your language) — a classic NLP paraphrasing technique that naturally
+            restructures phrasing while preserving meaning. Works for any language, but struggles with typos and
+            slang since the translation model is trained on formal text.
+          </div>
+        </div>
+
+        <!-- Translation Journal -->
+        <div class="journal-section">
+          <div class="journal-title">
+            &#128214; Recent Translations
+            <button class="action-btn" id="clearJournalBtn"
+              style="margin-left:auto;font-size:0.78rem;padding:5px 12px;">Clear All</button>
+          </div>
+          <div id="journalList" class="journal-list">
+            <div class="journal-empty">No translations yet. Start translating to build your journal!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Features ──────────────────────────────────────────── -->
+  <section id="features">
+    <div class="container">
+      <div class="fade-up">
+        <div class="section-label" style="justify-content:center">Features</div>
+        <h2 class="section-heading">Everything You Need</h2>
+        <p class="section-sub">Built for speed, accuracy, and a delightful user experience — powered by a real ML model.
+        </p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#9889;</div>
+          <h3>Fast Translation</h3>
+          <p>Machine learning model optimized for quick predictions with response caching for repeated phrases.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#127757;</div>
+          <h3>Any Language</h3>
+          <p>Translate between any of 100+ supported languages. Auto-detects your source language so you can just start
+            typing.</p>
+          <div class="feature-pills">
+            <span class="pill">100+ Languages</span>
+            <span class="pill">&#8594;</span>
+            <span class="pill">Any Direction</span>
+          </div>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#128203;</div>
+          <h3>Easy Export</h3>
+          <p>Copy translations instantly, listen via text-to-speech, or browse your personal translation journal.</p>
+          <div class="feature-pills">
+            <span class="pill">Copy</span>
+            <span class="pill">Speak</span>
+            <span class="pill">Journal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── How It Works ─────────────────────────────────────── -->
+  <section id="howitworks">
+    <div class="container">
+      <div class="fade-up">
+        <div class="section-label" style="justify-content:center">Process</div>
+        <h2 class="section-heading">How It Works</h2>
+        <p class="section-sub">Three simple steps. Seamless from start to finish.</p>
+      </div>
+      <div class="timeline fade-up">
+        <div class="timeline-item">
+          <div class="timeline-num">&#9312;</div>
+          <div class="timeline-content">
+            <h3>Enter Your Text</h3>
+            <p>Type or paste text in any supported language. The model auto-detects the source language — no manual
+              selection needed.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-num">&#9313;</div>
+          <div class="timeline-content">
+            <h3>ML Model Processes It</h3>
+            <p>Our NLLB-200 multilingual model tokenizes, encodes context, and generates an accurate translation using
+              neural sequence-to-sequence architecture across 100+ languages.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-num">&#9314;</div>
+          <div class="timeline-content">
+            <h3>Receive Your Translation</h3>
+            <p>The result appears instantly. Copy it, listen to it, or save it to your translation journal for later
+              reference.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── About Model ──────────────────────────────────────── -->
+  <section id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-content fade-up">
+          <div class="section-label">About</div>
+          <h2>Machine Learning<br />Model</h2>
+          <p>
+            Powered by <strong>Meta AI's NLLB-200</strong> (No Language Left Behind) — an open-source,
+            production-grade multilingual neural machine translation model covering 100+ languages
+            with a single set of weights, trained on massive parallel corpora.
+          </p>
+          <p>
+            Unlike template-based systems, the model understands context, grammar, and nuance,
+            translating complete sentences with natural fluency across languages — including many
+            low-resource ones.
+          </p>
+          <div class="tech-pills">
+            <span class="tech-pill">PyTorch</span>
+            <span class="tech-pill">Hugging Face</span>
+            <span class="tech-pill">NLLB-200</span>
+            <span class="tech-pill">FastAPI</span>
+            <span class="tech-pill">Transformer</span>
+            <span class="tech-pill">NLP</span>
+            <span class="tech-pill">Python</span>
+          </div>
+        </div>
+        <div class="model-card fade-up">
+          <div class="model-card-header">
+            <h3>Model Specifications</h3>
+            <p>facebook / nllb-200-distilled-600M</p>
+          </div>
+          <div class="model-stats">
+            <div class="stat-row">
+              <span class="stat-label">Architecture</span>
+              <span class="stat-badge">Seq-to-Seq</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Framework</span>
+              <span class="stat-value">Hugging Face Transformers</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Languages</span>
+              <span class="stat-value">100+ (FLORES-200 corpus)</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Direction</span>
+              <span class="stat-badge">Any-to-Any</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Max Input</span>
+              <span class="stat-value">500 characters</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Caching</span>
+              <span class="stat-badge">LRU (512 entries)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ──────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-logo">Linguo.</div>
+      <div class="footer-sub">Machine Learning Translation Project</div>
+      <div class="footer-links">
+        <a href="https://github.com/Priyanshi0907" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />
+          </svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/priyanshi-choudhary-03ab043b5/" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z" />
+            <rect x="2" y="9" width="4" height="12" />
+            <circle cx="4" cy="4" r="2" />
+          </svg>
+          LinkedIn
+        </a>
+      </div>
+      <div class="footer-bottom">
+        Made with &#128156; by <span>Priyanshi</span> &nbsp;&middot;&nbsp; Powered by NLLB-200 &nbsp;&middot;&nbsp;
+        2026
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── JavaScript ─────────────────────────────────────────── -->
+  <script>
+    const API_URL = '/translate';
+
+    // ── Theme Toggle ─────────────────────────────────────────
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('linguo-theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.addEventListener('click', () => {
+      const cur = html.getAttribute('data-theme');
+      const next = cur === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('linguo-theme', next);
+    });
+
+    // ── Scroll Fade-up ────────────────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // ── Language catalogue ──────────────────────────────────────
+    // Embedded directly so the selector always works even if /languages
+    // is briefly unreachable; refreshed from the backend on load if possible.
+    const FALLBACK_LANGUAGES = [{ "code": "af", "name": "Afrikaans" }, { "code": "sq", "name": "Albanian" }, { "code": "am", "name": "Amharic" }, { "code": "ar", "name": "Arabic" }, { "code": "hy", "name": "Armenian" }, { "code": "as", "name": "Assamese" }, { "code": "ast", "name": "Asturian" }, { "code": "ay", "name": "Aymara" }, { "code": "az", "name": "Azerbaijani" }, { "code": "eu", "name": "Basque" }, { "code": "be", "name": "Belarusian" }, { "code": "bn", "name": "Bengali" }, { "code": "bs", "name": "Bosnian" }, { "code": "bg", "name": "Bulgarian" }, { "code": "my", "name": "Burmese" }, { "code": "yue", "name": "Cantonese" }, { "code": "ca", "name": "Catalan" }, { "code": "ceb", "name": "Cebuano" }, { "code": "zh", "name": "Chinese (Simplified)" }, { "code": "zh-Hant", "name": "Chinese (Traditional)" }, { "code": "hr", "name": "Croatian" }, { "code": "cs", "name": "Czech" }, { "code": "da", "name": "Danish" }, { "code": "nl", "name": "Dutch" }, { "code": "dz", "name": "Dzongkha" }, { "code": "en", "name": "English" }, { "code": "eo", "name": "Esperanto" }, { "code": "et", "name": "Estonian" }, { "code": "fo", "name": "Faroese" }, { "code": "fj", "name": "Fijian" }, { "code": "fi", "name": "Finnish" }, { "code": "fr", "name": "French" }, { "code": "gl", "name": "Galician" }, { "code": "lg", "name": "Ganda (Luganda)" }, { "code": "ka", "name": "Georgian" }, { "code": "de", "name": "German" }, { "code": "el", "name": "Greek" }, { "code": "gn", "name": "Guarani" }, { "code": "gu", "name": "Gujarati" }, { "code": "ht", "name": "Haitian Creole" }, { "code": "ha", "name": "Hausa" }, { "code": "he", "name": "Hebrew" }, { "code": "hi", "name": "Hindi" }, { "code": "hu", "name": "Hungarian" }, { "code": "is", "name": "Icelandic" }, { "code": "ig", "name": "Igbo" }, { "code": "ilo", "name": "Ilocano" }, { "code": "id", "name": "Indonesian" }, { "code": "ga", "name": "Irish" }, { "code": "it", "name": "Italian" }, { "code": "ja", "name": "Japanese" }, { "code": "jv", "name": "Javanese" }, { "code": "kn", "name": "Kannada" }, { "code": "kk", "name": "Kazakh" }, { "code": "km", "name": "Khmer" }, { "code": "rw", "name": "Kinyarwanda" }, { "code": "ko", "name": "Korean" }, { "code": "ku", "name": "Kurdish (Kurmanji)" }, { "code": "ckb", "name": "Kurdish (Sorani)" }, { "code": "ky", "name": "Kyrgyz" }, { "code": "lo", "name": "Lao" }, { "code": "lv", "name": "Latvian" }, { "code": "ln", "name": "Lingala" }, { "code": "lt", "name": "Lithuanian" }, { "code": "lb", "name": "Luxembourgish" }, { "code": "mk", "name": "Macedonian" }, { "code": "mg", "name": "Malagasy" }, { "code": "ms", "name": "Malay" }, { "code": "ml", "name": "Malayalam" }, { "code": "mt", "name": "Maltese" }, { "code": "mi", "name": "Maori" }, { "code": "mr", "name": "Marathi" }, { "code": "mn", "name": "Mongolian" }, { "code": "ne", "name": "Nepali" }, { "code": "no", "name": "Norwegian (Bokmål)" }, { "code": "nn", "name": "Norwegian (Nynorsk)" }, { "code": "ny", "name": "Nyanja (Chichewa)" }, { "code": "oc", "name": "Occitan" }, { "code": "or", "name": "Odia" }, { "code": "om", "name": "Oromo" }, { "code": "ps", "name": "Pashto" }, { "code": "fa", "name": "Persian" }, { "code": "pl", "name": "Polish" }, { "code": "pt", "name": "Portuguese" }, { "code": "pa", "name": "Punjabi" }, { "code": "qu", "name": "Quechua" }, { "code": "ro", "name": "Romanian" }, { "code": "rn", "name": "Rundi" }, { "code": "ru", "name": "Russian" }, { "code": "sm", "name": "Samoan" }, { "code": "sg", "name": "Sango" }, { "code": "sa", "name": "Sanskrit" }, { "code": "gd", "name": "Scottish Gaelic" }, { "code": "sr", "name": "Serbian" }, { "code": "sn", "name": "Shona" }, { "code": "scn", "name": "Sicilian" }, { "code": "sd", "name": "Sindhi" }, { "code": "si", "name": "Sinhala" }, { "code": "sk", "name": "Slovak" }, { "code": "sl", "name": "Slovenian" }, { "code": "so", "name": "Somali" }, { "code": "st", "name": "Southern Sotho" }, { "code": "es", "name": "Spanish" }, { "code": "su", "name": "Sundanese" }, { "code": "sw", "name": "Swahili" }, { "code": "ss", "name": "Swati" }, { "code": "sv", "name": "Swedish" }, { "code": "tl", "name": "Tagalog" }, { "code": "tg", "name": "Tajik" }, { "code": "ta", "name": "Tamil" }, { "code": "te", "name": "Telugu" }, { "code": "th", "name": "Thai" }, { "code": "bo", "name": "Tibetan" }, { "code": "ti", "name": "Tigrinya" }, { "code": "ts", "name": "Tsonga" }, { "code": "tn", "name": "Tswana" }, { "code": "tr", "name": "Turkish" }, { "code": "tk", "name": "Turkmen" }, { "code": "uk", "name": "Ukrainian" }, { "code": "ur", "name": "Urdu" }, { "code": "uz", "name": "Uzbek" }, { "code": "vi", "name": "Vietnamese" }, { "code": "war", "name": "Waray" }, { "code": "cy", "name": "Welsh" }, { "code": "wo", "name": "Wolof" }, { "code": "xh", "name": "Xhosa" }, { "code": "yi", "name": "Yiddish" }, { "code": "yo", "name": "Yoruba" }, { "code": "zu", "name": "Zulu" }];
+    let LANG_LIST = FALLBACK_LANGUAGES;
+    let LANG_NAME_BY_CODE = {};
+
+    async function loadLanguages() {
+      try {
+        const res = await fetch('/languages');
+        if (res.ok) {
+          const fetched = await res.json();
+          if (Array.isArray(fetched) && fetched.length > 0) LANG_LIST = fetched;
+        }
+      } catch (e) {
+        // Keep using FALLBACK_LANGUAGES — the dropdowns still work offline.
+      }
+      LANG_NAME_BY_CODE = Object.fromEntries(LANG_LIST.map(l => [l.code, l.name]));
+
+      populateLangSelect(srcLangSelect, 'en');
+      populateLangSelect(tgtLangSelect, 'fr');
+      populateLangSelect(fileTgtLangSelect, 'en');
+      populateLangSelect(rephraseLangSelect, 'en');
+      updateTranslatorPlaceholders();
+    }
+
+    function populateLangSelect(select, defaultCode) {
+      select.innerHTML = LANG_LIST.map(l =>
+        `<option value="${l.code}"${l.code === defaultCode ? ' selected' : ''}>${escHtml(l.name)}</option>`
+      ).join('');
+    }
+
+    // ── Translator State ──────────────────────────────────────
+    let outputText = '';
+    const inputEl = document.getElementById('inputText');
+    const charCount = document.getElementById('charCount');
+    const outputBox = document.getElementById('outputBox');
+    const outputActions = document.getElementById('outputActions');
+    const translateBtn = document.getElementById('translateBtn');
+    const swapBtn = document.getElementById('swapBtn');
+    const srcLangSelect = document.getElementById('srcLangSelect');
+    const tgtLangSelect = document.getElementById('tgtLangSelect');
+    const fileTgtLangSelect = document.getElementById('fileTgtLangSelect');
+    const copyBtn = document.getElementById('copyBtn');
+    const speakBtn = document.getElementById('speakBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const successToast = document.getElementById('successToast');
+
+    inputEl.addEventListener('input', () => {
+      charCount.textContent = inputEl.value.length + ' / 500';
+    });
+
+    function updateTranslatorPlaceholders() {
+      const srcName = LANG_NAME_BY_CODE[srcLangSelect.value] || 'your language';
+      inputEl.placeholder = 'Start typing in ' + srcName + '...';
+      resetOutput();
+    }
+
+    swapBtn.addEventListener('click', () => {
+      swapBtn.classList.add('rotating');
+      setTimeout(() => swapBtn.classList.remove('rotating'), 400);
+      const srcVal = srcLangSelect.value;
+      srcLangSelect.value = tgtLangSelect.value;
+      tgtLangSelect.value = srcVal;
+      const prev = outputText;
+      inputEl.value = prev;
+      charCount.textContent = prev.length + ' / 500';
+      updateTranslatorPlaceholders();
+    });
+
+    srcLangSelect.addEventListener('change', updateTranslatorPlaceholders);
+    tgtLangSelect.addEventListener('change', updateTranslatorPlaceholders);
+
+    translateBtn.addEventListener('click', doTranslate);
+    inputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) doTranslate();
+    });
+
+    async function doTranslate() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      const sourceLang = srcLangSelect.value;
+      const targetLang = tgtLangSelect.value;
+
+      if (sourceLang === targetLang) {
+        outputBox.innerHTML = '<div style="color:#ef4444;font-size:0.92rem;">&#9888;&#65039; Source and target languages must differ.</div>';
+        outputActions.style.display = 'none';
+        return;
+      }
+
+      translateBtn.disabled = true;
+      outputBox.style.opacity = '0.5';
+      successToast.classList.remove('show');
+
+      const phrases = ['Analyzing grammar', 'Finding context', 'Generating translation'];
+      let pi = 0;
+      translateBtn.innerHTML = phrases[0] + ' <span class="loading-dots"><span></span><span></span><span></span></span>';
+      const pInterval = setInterval(() => {
+        pi = (pi + 1) % phrases.length;
+        const dots = translateBtn.querySelector('.loading-dots');
+        if (dots) translateBtn.firstChild.textContent = phrases[pi] + ' ';
+      }, 750);
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, source_lang: sourceLang, target_lang: targetLang })
+        });
+        clearInterval(pInterval);
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Translation failed');
+        }
+
+        const data = await res.json();
+        outputText = data.translated_text;
+        showOutput(outputText);
+        addToJournal(text, outputText, data.source_lang, data.target_lang);
+
+        translateBtn.disabled = false;
+        translateBtn.innerHTML = 'Translate &#8594;';
+        outputBox.style.opacity = '1';
+        successToast.classList.add('show');
+        setTimeout(() => successToast.classList.remove('show'), 2200);
+
+      } catch (err) {
+        clearInterval(pInterval);
+        translateBtn.disabled = false;
+        translateBtn.innerHTML = 'Translate &#8594;';
+        outputBox.style.opacity = '1';
+        outputBox.innerHTML = '<div style="color:#ef4444;font-size:0.92rem;">&#9888;&#65039; ' + escHtml(err.message) + '<br/><small style="color:var(--text-muted)">Make sure the backend is running.</small></div>';
+        outputActions.style.display = 'flex';
+      }
+    }
+
+    function showOutput(text) {
+      outputBox.innerHTML = '<div style="animation:fadeIn 0.4s ease">' + escHtml(text) + '</div>';
+      outputActions.style.display = 'flex';
+    }
+
+    function resetOutput() {
+      const tgtName = LANG_NAME_BY_CODE[tgtLangSelect.value] || 'translation';
+      outputBox.innerHTML = '<div class="output-placeholder"><span class="output-placeholder-icon">&#128172;</span><span>Your ' + tgtName + ' translation<br/>will appear here.</span></div>';
+      outputActions.style.display = 'none';
+      outputText = '';
+    }
+
+    loadLanguages();
+
+    copyBtn.addEventListener('click', async () => {
+      if (!outputText) return;
+      try {
+        await navigator.clipboard.writeText(outputText);
+        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        setTimeout(() => {
+          copyBtn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+        }, 1800);
+      } catch (e) { }
+    });
+
+    speakBtn.addEventListener('click', () => {
+      if (!outputText) return;
+      const utter = new SpeechSynthesisUtterance(outputText);
+      const tgt = tgtLangSelect.value;
+      utter.lang = tgt === 'zh-Hant' ? 'zh-TW' : tgt === 'zh' ? 'zh-CN' : tgt;
+      window.speechSynthesis.speak(utter);
+      speakBtn.style.color = 'var(--primary)';
+      utter.onend = () => { speakBtn.style.color = ''; };
+    });
+
+    clearBtn.addEventListener('click', () => {
+      inputEl.value = '';
+      charCount.textContent = '0 / 500';
+      resetOutput();
+    });
+
+    // ── Translation Journal ───────────────────────────────────
+    let journal = [];
+    try { journal = JSON.parse(localStorage.getItem('linguo-journal') || '[]'); } catch (e) { }
+    renderJournal();
+
+    function addToJournal(src, tgt, srcLang, tgtLang) {
+      journal.unshift({ id: Date.now(), src, tgt, srcLang, tgtLang, ts: new Date().toISOString(), fav: false });
+      if (journal.length > 10) journal = journal.slice(0, 10);
+      saveJournal();
+      renderJournal();
+    }
+
+    function saveJournal() {
+      try { localStorage.setItem('linguo-journal', JSON.stringify(journal)); } catch (e) { }
+    }
+
+    function journalPairLabel(item) {
+      if (item.srcLang && item.tgtLang) {
+        return item.srcLang.toUpperCase() + ' &#8594; ' + item.tgtLang.toUpperCase();
+      }
+      // Legacy entries saved before multi-language support
+      if (item.dir) return item.dir === 'en' ? 'EN &#8594; FR' : 'FR &#8594; EN';
+      return '';
+    }
+
+    function timeAgo(iso) {
+      const diff = (Date.now() - new Date(iso)) / 1000;
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
+      return Math.floor(diff / 86400) + ' day(s) ago';
+    }
+
+    function renderJournal() {
+      const list = document.getElementById('journalList');
+      if (journal.length === 0) {
+        list.innerHTML = '<div class="journal-empty">No translations yet. Start translating to build your journal!</div>';
+        return;
+      }
+      list.innerHTML = journal.map(item => `
+        <div class="journal-item" id="ji-${item.id}">
+          <div class="journal-texts">
+            <div class="journal-src">${escHtml(item.src)}</div>
+            <div class="journal-tgt">${escHtml(item.tgt)}</div>
+            <div class="journal-meta">${journalPairLabel(item)} &middot; ${timeAgo(item.ts)}</div>
+          </div>
+          <div class="journal-actions">
+            <button class="j-btn fav ${item.fav ? 'active' : ''}" onclick="toggleFav(${item.id})" title="Favourite">&#9734;</button>
+            <button class="j-btn" onclick="copyJ(${item.id})" title="Copy">&#128203;</button>
+            <button class="j-btn del" onclick="deleteJ(${item.id})" title="Delete">&#128465;</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.toggleFav = (id) => {
+      const item = journal.find(j => j.id === id);
+      if (item) { item.fav = !item.fav; saveJournal(); renderJournal(); }
+    };
+    window.copyJ = (id) => {
+      const item = journal.find(j => j.id === id);
+      if (item) try { navigator.clipboard.writeText(item.tgt); } catch (e) { }
+    };
+    window.deleteJ = (id) => {
+      journal = journal.filter(j => j.id !== id);
+      saveJournal();
+      renderJournal();
+    };
+
+    document.getElementById('clearJournalBtn').addEventListener('click', () => {
+      journal = []; saveJournal(); renderJournal();
+    });
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Inject fadeIn keyframe
+    const s = document.createElement('style');
+    s.textContent = '@keyframes fadeIn{from{opacity:0}to{opacity:1}}';
+    document.head.appendChild(s);
+
+    // ── Tab Switching ─────────────────────────────────────────
+    function switchTab(tab) {
+      ['text', 'file', 'rephrase'].forEach(t => {
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+        document.getElementById('panel' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+      });
+    }
+
+    // ── File Translate ────────────────────────────────────────
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileTransBtn = document.getElementById('fileTranslateBtn');
+    const fileResult = document.getElementById('fileResult');
+    const fileResultName = document.getElementById('fileResultName');
+    const fileResultDir = document.getElementById('fileResultDir');
+    const fileResultText = document.getElementById('fileResultText');
+    const fileToast = document.getElementById('fileSuccessToast');
+    const downloadDocxBtn = document.getElementById('downloadDocxBtn');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    let currentFileText = '';
+    let originalFilename = 'document.txt';
+
+    // Drag-and-drop
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; updateDropLabel(e.dataTransfer.files[0].name); }
+    });
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) updateDropLabel(fileInput.files[0].name); });
+
+    function updateDropLabel(name) {
+      dropZone.querySelector('.drop-title').textContent = '📄 ' + name;
+      dropZone.querySelector('.drop-sub').textContent = 'Ready to translate';
+    }
+
+    fileTransBtn.addEventListener('click', async () => {
+      if (!fileInput.files[0]) { alert('Please select a file first.'); return; }
+      const file = fileInput.files[0];
+      originalFilename = file.name;
+      fileTransBtn.disabled = true;
+      fileTransBtn.innerHTML = 'Translating <span class="loading-dots"><span></span><span></span><span></span></span>';
+      fileResult.style.display = 'none';
+      fileToast.classList.remove('show');
+
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('target_lang', fileTgtLangSelect.value);
+        const res = await fetch('/translate-file', { method: 'POST', body: fd });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Failed'); }
+        const data = await res.json();
+        currentFileText = data.translated_text;
+        fileResultName.textContent = data.filename;
+        fileResultDir.textContent = data.source_lang.toUpperCase() + ' → ' + data.target_lang.toUpperCase();
+        fileResultText.textContent = data.translated_text;
+        fileResult.style.display = 'block';
+        fileToast.classList.add('show');
+        setTimeout(() => fileToast.classList.remove('show'), 2200);
+
+        // Add file translation to journal
+        addToJournal("📄 File: " + data.filename, data.translated_text, data.source_lang, data.target_lang);
+      } catch (err) {
+        fileResult.style.display = 'block';
+        fileResultText.textContent = '⚠️ ' + err.message;
+      } finally {
+        fileTransBtn.disabled = false;
+        fileTransBtn.innerHTML = 'Translate File →';
+      }
+    });
+
+    copyFileBtn.addEventListener('click', async () => {
+      if (!currentFileText) return;
+      await navigator.clipboard.writeText(currentFileText).catch(() => { });
+      copyFileBtn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+      setTimeout(() => { copyFileBtn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy'; }, 1800);
+    });
+
+    async function triggerFileDownload(endpoint, ext) {
+      if (!currentFileText) return;
+      const dotIndex = originalFilename.lastIndexOf('.');
+      const baseName = dotIndex !== -1 ? originalFilename.substring(0, dotIndex) : originalFilename;
+      const downloadName = `${baseName}_translated.${ext}`;
+
+      try {
+        const res = await fetch(`/${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: currentFileText, filename: downloadName })
+        });
+        if (!res.ok) throw new Error('Could not generate document');
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = downloadName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      } catch (err) {
+        alert('Download failed: ' + err.message);
+      }
+    }
+
+    downloadDocxBtn.addEventListener('click', () => triggerFileDownload('generate-docx', 'docx'));
+    downloadPdfBtn.addEventListener('click', () => triggerFileDownload('generate-pdf', 'pdf'));
+
+
+    // ── AI Rephrase ───────────────────────────────────────────
+    const rephraseLangSelect = document.getElementById('rephraseLangSelect');
+    const rephraseEngineSelect = document.getElementById('rephraseEngineSelect');
+    const rephraseEngineNote = document.getElementById('rephraseEngineNote');
+
+    const ENGINE_NOTES = {
+      backtranslation: '&#129302; <strong>How it works:</strong> Uses back-translation through a pivot language ' +
+        '(e.g. your language &#8594; English &#8594; your language) — a classic NLP paraphrasing technique. ' +
+        'Works for any language, but struggles with typos and slang since the translation model is trained on formal text.',
+      paraphrase: '&#128218; <strong>How it works:</strong> Uses a dedicated T5 paraphrase model to vary sentence ' +
+        'structure while keeping meaning. English only — better at natural rewrites than back-translation, but still ' +
+        'trained mostly on formal text.',
+      llm: '&#129504; <strong>How it works:</strong> Sends your text to Google Gemini via the Gemini API, which genuinely ' +
+        'understands intent, typos, and slang and rewrites accordingly. Works for any language. Requires the server to ' +
+        'have <code>GEMINI_API_KEY</code> set.'
+    };
+
+    function updateEngineNote() {
+      rephraseEngineNote.innerHTML = ENGINE_NOTES[rephraseEngineSelect.value] || ENGINE_NOTES.backtranslation;
+    }
+    rephraseEngineSelect.addEventListener('change', updateEngineNote);
+
+    document.getElementById('rephraseBtn').addEventListener('click', async () => {
+      const text = document.getElementById('rephraseInput').value.trim();
+      if (!text) return;
+      const btn = document.getElementById('rephraseBtn');
+      const out = document.getElementById('rephraseOutput');
+      const toast = document.getElementById('rephraseToast');
+      const engine = rephraseEngineSelect.value;
+      btn.disabled = true;
+      btn.innerHTML = 'Rephrasing <span class="loading-dots"><span></span><span></span><span></span></span>';
+      out.innerHTML = '<span class="rephrase-placeholder">Rephrasing...</span>';
+      toast.classList.remove('show');
+
+      try {
+        const res = await fetch('/rephrase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, source_lang: rephraseLangSelect.value, engine })
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+        const data = await res.json();
+        out.innerHTML = escHtml(data.rephrased) +
+          '<div style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em">via ' + escHtml(data.engine) + '</div>';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2200);
+      } catch (err) {
+        out.innerHTML = '<span style="color:#ef4444">⚠️ ' + escHtml(err.message) + '</span>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Rephrase →';
+      }
+    });
+  </script>
+</body>
